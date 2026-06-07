@@ -16,3 +16,8 @@ class LocacaoResponse(BaseModel):
     data_devolucao_real: Optional[datetime] = None
     status_locacao: str
     model_config = ConfigDict(from_attributes=True)
+
+class CheckInRequest(BaseModel):
+    locacao_id: int
+    possui_avaria: bool
+    descricao_avaria: Optional[str] = None
