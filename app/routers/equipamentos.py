@@ -5,7 +5,8 @@ from typing import List
 
 from app.database.database import get_db
 from app.models.equipamento import Equipamento
-from app.schemas.equipamento import EquipamentoCreate, EquipamentoResponse
+from app.schemas.equipamento import EquipamentoCreate, EquipamentoResponse, HistoricoEvent
+from datetime import  datetime, date
 
 router = APIRouter(prefix="/api/equipamentos", tags=["Equipamentos"])
 
@@ -26,3 +27,69 @@ def cadastrar_equipamento(equip_in: EquipamentoCreate, db: Session = Depends(get
 @router.get("/", response_model=List[EquipamentoResponse])
 def listar_equipamentos(db: Session = Depends(get_db)):
     return db.query(Equipamento).all()
+
+@router.get("/{id}/historico", response_model=List[HistoricoEvent])
+def pegar_historico_equipamento(id: int, db: Session = Depends(get_db)):
+    """Busca toda a vida útil de um equipamento e ordena por data."""
+    
+    equipamento = db.query(Equipamento).filter(Equipamento.id == id).first()
+    if not equipamento:
+        raise HTTPException(status_code=404, detail="Equipamento não encontrado.")
+
+    eventos_brutos = []
+
+    for loc in equipamento.locacoes:
+        eventos_brutos.append({
+            "ev": "Check-out",
+            "raw_date": loc.data_saida,
+            "desc": f"Vinculado a {loc.cliente.nome_razao_social}",
+            "color": "var(--violet)"
+        })
+
+        if loc.data_devolucao_real:
+            eventos_brutos.append({
+                "ev": "Check-in",
+                "raw_date": loc.data_devolucao_real,
+                "desc": "Devolvido ao estoque",
+                "color": "var(--green)"
+            })
+
+    for man in equipamento.manutencoes:
+        data_hora = datetime.combine(man.data_entrada, datetime.min.time()) if type(man.data_entrada) is date else man.data_entrada
+        
+        eventos_brutos.append({
+            "ev": "Em manutenção",
+            "raw_date": data_hora,
+            "desc": f"Avaria: {man.descricao_avaria}",
+            "color": "var(--amber)"
+        })
+
+    eventos_brutos.sort(key=lambda x: x["raw_date"], reverse=True)
+
+    resultado_formatado = []
+    for ev in eventos_brutos:
+        resultado_formatado.append(HistoricoEvent(
+            ev=ev["ev"],
+            date=ev["raw_date"].strftime("%d/%m/%Y"),
+            desc=ev["desc"],
+            color=ev["color"]
+        ))
+
+    return resultado_formatado
+
+@router.get("/resumo")
+def pegar_resumo_inventario(db: Session = Depends(get_db)):
+    equipamentos = db.query(Equipamento).all()
+    
+    total = len(equipamentos)
+    disponiveis = len([e for e in equipamentos if e.status_equipamento == 'Disponível'])
+    alugados = len([e for e in equipamentos if e.status_equipamento == 'Alugado'])
+    manutencao = len([e for e in equipamentos if e.status_equipamento == 'Em Manutenção'])
+    
+    return {
+        "total": total,
+        "disponiveis": disponiveis,
+        "alugados": alugados,
+        "manutencao": manutencao,
+        "equipamentos": equipamentos 
+    }

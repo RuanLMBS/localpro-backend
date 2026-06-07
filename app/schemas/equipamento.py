@@ -15,3 +15,9 @@ class EquipamentoResponse(EquipamentoBase):
     id: int
     status_equipamento: str
     model_config = ConfigDict(from_attributes=True)
+
+class HistoricoEvent(BaseModel):
+    ev: str
+    date: str
+    desc: str
+    color: str
