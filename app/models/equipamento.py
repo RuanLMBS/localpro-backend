@@ -1,9 +1,8 @@
 import enum
 from sqlalchemy import Column, Integer, String, Numeric, Enum as SQLEnum
 from sqlalchemy.orm import relationship
-from app.config.settings import Base
+from app.database.database import Base
 
-# O Enum restringe os valores aceitos, conforme a regra de negócio do LocaPro
 class StatusEquipamento(enum.Enum):
     DISPONIVEL = "Disponível"
     ALUGADO = "Alugado"

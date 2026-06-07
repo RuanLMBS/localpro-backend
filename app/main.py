@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.database.database import engine, Base
-from app.models import *
+
+from app.routers import locacoes
 
 Base.metadata.create_all(bind=engine)
 
@@ -9,6 +10,8 @@ app = FastAPI(
     description="Backend do LocalPro",
     version="1.0.0"
 )
+
+app.include_router(locacoes.router)
 
 @app.get("/")
 def read_root():

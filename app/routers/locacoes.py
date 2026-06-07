@@ -4,7 +4,7 @@ from app.database.database import get_db
 from app.schemas.locacao import LocacaoCreate, LocacaoResponse
 from app.services.locacao_service import fazer_checkout
 
-router = APIRouter(prefix="/api/locacoes", tags="Locações")
+router = APIRouter(prefix="/api/locacoes", tags=["Locações"])
 
 @router.post("/checkout", response_model=LocacaoResponse, status_code=status.HTTP_201_CREATED)
 def checkout_equipamento(locacao: LocacaoCreate, db: Session = Depends(get_db)):

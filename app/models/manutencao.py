@@ -2,7 +2,7 @@ import enum
 from sqlalchemy import Column, Integer, ForeignKey, Date, Text, Enum as SQLEnum
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from app.config.settings import Base
+from app.database.database import Base
 
 class StatusManutencao(enum.Enum):
     EM_REPARO = "Em Reparo"
