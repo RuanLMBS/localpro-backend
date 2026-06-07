@@ -16,6 +16,10 @@ def verificar_senha(senha_plana: str, senha_hash: str) -> bool:
 
 def criar_token_acesso(dados: dict):
     to_encode = dados.copy()
+
+    if "id" in to_encode and hasattr(to_encode["id"], 'hex'):
+        to_encode["id"] = str(to_encode["id"])
+        
     expiracao = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expiracao})
 
