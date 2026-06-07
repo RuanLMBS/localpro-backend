@@ -9,6 +9,7 @@ from app.config.security import verificar_senha, criar_token_acesso, gerar_hash_
 
 router = APIRouter(prefix="/api/auth", tags=["Autenticação"])
 
+@router.post("/registrar", response_model=UsuarioResponse, status_code=status.HTTP_201_CREATED)
 def registrar_usuario(usuario_in: UsuarioCreate, db: Session = Depends(get_db)):
     usuario_existente = db.query(Usuario).filter(Usuario.email == usuario_in.email).first()
     if usuario_existente:
