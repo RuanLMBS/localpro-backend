@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from app.database.database import engine, Base
 
-from app.routers import locacoes
+from app.routers import locacoes, clientes, equipamentos
 
 Base.metadata.create_all(bind=engine)
 
@@ -12,7 +12,9 @@ app = FastAPI(
 )
 
 app.include_router(locacoes.router)
+app.include_router(clientes.router)
+app.include_router(equipamentos.router)
 
 @app.get("/")
-def read_root():
-    return {"mensagem": "API LocaPro online e banco de dados sincronizado!"}
+def health_check():
+    return {"mensagem": "No ar!"}
