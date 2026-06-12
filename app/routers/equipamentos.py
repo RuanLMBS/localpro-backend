@@ -8,6 +8,8 @@ from app.models.equipamento import Equipamento
 from app.schemas.equipamento import EquipamentoCreate, EquipamentoResponse, HistoricoEvent
 from datetime import  datetime, date
 
+from app.services.equipamento_service import obter_resumo_inventario
+
 router = APIRouter(prefix="/api/equipamentos", tags=["Equipamentos"])
 
 @router.post("/", response_model=EquipamentoResponse, status_code=status.HTTP_201_CREATED)
@@ -30,7 +32,6 @@ def listar_equipamentos(db: Session = Depends(get_db)):
 
 @router.get("/{id}/historico", response_model=List[HistoricoEvent])
 def pegar_historico_equipamento(id: int, db: Session = Depends(get_db)):
-    """Busca toda a vida útil de um equipamento e ordena por data."""
     
     equipamento = db.query(Equipamento).filter(Equipamento.id == id).first()
     if not equipamento:
@@ -79,17 +80,6 @@ def pegar_historico_equipamento(id: int, db: Session = Depends(get_db)):
 
 @router.get("/resumo")
 def pegar_resumo_inventario(db: Session = Depends(get_db)):
-    equipamentos = db.query(Equipamento).all()
-    
-    total = len(equipamentos)
-    disponiveis = len([e for e in equipamentos if e.status_equipamento == 'Disponível'])
-    alugados = len([e for e in equipamentos if e.status_equipamento == 'Alugado'])
-    manutencao = len([e for e in equipamentos if e.status_equipamento == 'Em Manutenção'])
-    
-    return {
-        "total": total,
-        "disponiveis": disponiveis,
-        "alugados": alugados,
-        "manutencao": manutencao,
-        "equipamentos": equipamentos 
-    }
+    resultado = obter_resumo_inventario(db=db)
+
+    return resultado

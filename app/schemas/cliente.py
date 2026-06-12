@@ -12,6 +12,12 @@ class ClienteCreate(ClienteBase):
 
 class ClienteResponse(ClienteBase):
     id: int
+    nome_razao_social:str
+    cnpj: str
+    telefone_contato: Optional[str] = None
+    email_contato: Optional[str] = None
     ativo: bool
+
+    equipamentos_ativos: int = 0
 
     model_config = ConfigDict(from_attributes=True)

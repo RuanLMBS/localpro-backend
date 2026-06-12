@@ -11,8 +11,8 @@ class UsuarioCreate(UsuarioBase):
     senha: str
 
 class UsuarioResponse(UsuarioBase):
-    id: UUID
     id: int
+    nome: str
     data_criacao: datetime
 
     model_config = ConfigDict(from_attributes=True)

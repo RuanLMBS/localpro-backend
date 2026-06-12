@@ -6,6 +6,9 @@ from app.database.database import get_db
 from app.models.cliente import Cliente
 from app.schemas.cliente import ClienteCreate, ClienteResponse
 
+from sqlalchemy import func
+from app.models.locacao import Locacao
+
 router = APIRouter(prefix="/api/clientes", tags=["Clientes"])
 
 @router.post("/", response_model=ClienteResponse, status_code=status.HTTP_201_CREATED)
@@ -25,4 +28,18 @@ def cadastrar_cliente(cliente_in: ClienteCreate, db: Session = Depends(get_db)):
 
 @router.get("/", response_model=List[ClienteResponse])
 def listar_clientes(db: Session = Depends(get_db)):
-    return db.query(Cliente).all()
+    resultados = db.query(
+        Cliente,
+        func.count(Locacao.id).filter(Locacao.data_devolucao_real == None).label("total")
+    ).outerjoin(
+        Locacao, Locacao.cliente_id == Cliente.id
+    ).group_by(
+        Cliente.id
+    ).all()
+    
+    clientes_formatados = []
+    for cliente, total in resultados:
+        cliente.equipamentos_ativos = total 
+        clientes_formatados.append(cliente)
+
+    return clientes_formatados

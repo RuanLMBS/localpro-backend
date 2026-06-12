@@ -4,7 +4,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.database.database import Base
 
-class StatusManutencao(enum.Enum):
+class StatusManutencao(str, enum.Enum):
     EM_REPARO = "Em Reparo"
     CONCLUIDO = "Concluído"
 

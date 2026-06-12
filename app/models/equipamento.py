@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String, Numeric, Enum as SQLEnum
 from sqlalchemy.orm import relationship
 from app.database.database import Base
 
-class StatusEquipamento(enum.Enum):
+class StatusEquipamento(str, enum.Enum):
     DISPONIVEL = "Disponível"
     ALUGADO = "Alugado"
     EM_MANUTENCAO = "Em Manutenção"

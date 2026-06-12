@@ -34,10 +34,9 @@ def fazer_checkout(db: Session, locacao_dados: LocacaoCreate):
 
     return nova_locacao
 
-def fazer_checkin(db: Session, dados_checkin: CheckInRequest):
+def fazer_checkin(db: Session, id: int, dados_checkin: CheckInRequest):
     locacao = db.query(Locacao).filter(
-        Locacao.id == dados_checkin.locacao_id,
-        Locacao.status_locacao == StatusLocacao.ATIVA.value
+        Locacao.id == id
     ).first()
 
     if not locacao:
@@ -48,7 +47,7 @@ def fazer_checkin(db: Session, dados_checkin: CheckInRequest):
     locacao.data_devolucao_real = datetime.now()
     locacao.status_locacao = StatusLocacao.CONCLUIDA.value
 
-    if dados_checkin.possui_avaria:
+    if dados_checkin.com_avaria:
         equipamento.status_equipamento = StatusEquipamento.EM_MANUTENCAO.value
 
         nova_manutencao = Manutencao(
@@ -67,4 +66,28 @@ def fazer_checkin(db: Session, dados_checkin: CheckInRequest):
     return {
         "mensagem": "Check-in realizado com sucesso",
         "status_equipamento": equipamento.status_equipamento
+    }
+
+def concluir_manutencao_service(manutencao_id: int, db: Session):
+    manutencao = db.query(Manutencao).filter(Manutencao.id == manutencao_id, Manutencao.status_manutencao == "EM_REPARO").first()
+
+    if not manutencao:
+        raise HTTPException(status_code=404, detail="Manutenção não encontrada.")
+    
+    if manutencao.data_conclusao:
+        raise HTTPException(status_code=400, detail="Esta manutenção já está concluída.")
+    
+    manutencao.data_conclusao = datetime.now()
+    manutencao.status_manutencao = "CONCLUIDO" 
+
+    equipamento = db.query(Equipamento).filter(Equipamento.id == manutencao.equipamento_id).first()
+    if equipamento:
+        equipamento.status_equipamento = StatusEquipamento.DISPONIVEL.value
+
+    db.commit()
+    db.refresh(manutencao)
+
+    return {
+        "message": "Manutenção concluída com sucesso",
+        "equipamento_id": equipamento.id
     }
