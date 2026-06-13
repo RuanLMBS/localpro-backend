@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, Integer, String, Numeric, Enum as SQLEnum
+from sqlalchemy import Column, Integer, String, Numeric, Enum as SQLEnum, ForeignKey
 from sqlalchemy.orm import relationship
 from app.database.database import Base
 
@@ -14,7 +14,7 @@ class Equipamento(Base):
     id = Column(Integer, primary_key=True, index=True)
     nome = Column(String, nullable=False)
     categoria = Column(String)
-    numero_patrimonio = Column(String, unique=True, index=True, nullable=False)
+    numero_patrimonio = Column(String, index=True, nullable=False)
     valor_diaria = Column(Numeric(10, 2), nullable=False)
     
     status_equipamento = Column(
@@ -24,3 +24,6 @@ class Equipamento(Base):
 
     locacoes = relationship("Locacao", back_populates="equipamento")
     manutencoes = relationship("Manutencao", back_populates="equipamento")
+
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    criador = relationship("Usuario", back_populates="equipamentos")

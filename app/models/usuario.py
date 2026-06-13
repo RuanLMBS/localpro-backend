@@ -2,6 +2,8 @@ from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.sql import func
 from app.database.database import Base
 
+from sqlalchemy.orm import relationship
+
 class Usuario(Base):
     __tablename__ = "usuarios"
 
@@ -11,3 +13,6 @@ class Usuario(Base):
     senha_hash = Column(String, nullable=False)
     nome_locadora = Column(String, nullable=False)
     data_criacao = Column(DateTime(timezone=True), server_default=func.now())
+
+    equipamentos = relationship("Equipamento", back_populates="criador")
+    clientes = relationship("Cliente", back_populates="criador")
