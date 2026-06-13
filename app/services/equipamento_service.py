@@ -3,8 +3,10 @@ from app.models.equipamento import Equipamento
 from app.models.locacao import Locacao
 from app.models.manutencao import Manutencao
 
-def obter_resumo_inventario(db: Session):
-    equipamentos = db.query(Equipamento).all()
+def obter_resumo_inventario(db: Session, user_id):
+    equipamentos = db.query(Equipamento).filter(
+        Equipamento.usuario_id == user_id
+    ).all()
     
     lista_formatada = []
     
