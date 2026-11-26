@@ -8,7 +8,7 @@ from app.models.equipamento import Equipamento
 from app.schemas.equipamento import EquipamentoCreate, EquipamentoResponse, HistoricoEvent
 from datetime import  datetime, date
 
-from app.routers.auth import ler_usuario_atual
+from app.config.security import get_actual_user
 
 from app.services.equipamento_service import obter_resumo_inventario
 
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/api/equipamentos", tags=["Equipamentos"])
 def cadastrar_equipamento(
     equip_in: EquipamentoCreate, 
     db: Session = Depends(get_db),
-    current_user = Depends(ler_usuario_atual)
+    current_user = Depends(get_actual_user)
 ):
     
     novo_equipamento = Equipamento(
@@ -33,11 +33,11 @@ def cadastrar_equipamento(
     return novo_equipamento
 
 @router.get("/", response_model=List[EquipamentoResponse])
-def listar_equipamentos(db: Session = Depends(get_db), current_user = Depends(ler_usuario_atual)):
+def listar_equipamentos(db: Session = Depends(get_db), current_user = Depends(get_actual_user)):
     return db.query(Equipamento).filter(Equipamento.usuario_id == current_user.id).all()
 
 @router.get("/{id}/historico", response_model=List[HistoricoEvent])
-def pegar_historico_equipamento(id: int, db: Session = Depends(get_db), current_user = Depends(ler_usuario_atual)):
+def pegar_historico_equipamento(id: int, db: Session = Depends(get_db), current_user = Depends(get_actual_user)):
     
     equipamento = db.query(Equipamento).filter(
         Equipamento.id == id,
@@ -88,7 +88,7 @@ def pegar_historico_equipamento(id: int, db: Session = Depends(get_db), current_
     return resultado_formatado
 
 @router.get("/resumo")
-def pegar_resumo_inventario(db: Session = Depends(get_db), current_user = Depends(ler_usuario_atual)):
+def pegar_resumo_inventario(db: Session = Depends(get_db), current_user = Depends(get_actual_user)):
     resultado = obter_resumo_inventario(db=db, user_id=current_user.id)
 
     return resultado

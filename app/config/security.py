@@ -34,7 +34,7 @@ def criar_token_acesso(dados: dict):
     token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return token
 
-def obter_usuario_atual(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+def get_actual_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     """Descriptografa o token, verifica se é válido e retorna o usuário do banco."""
     
     credenciais_exception = HTTPException(

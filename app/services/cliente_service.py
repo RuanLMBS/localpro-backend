@@ -2,20 +2,19 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.models.cliente import Cliente
 from app.models.locacao import Locacao
+from app.schemas.cliente import ClienteCreate
+from fastapi import HTTPException
+from app.repositories.cliente_repository import get_client_by_cnpj, add_client
 
-def listar_todos_clientes(db: Session):
-    resultados = db.query(
-        Cliente,
-        func.count(Locacao.id).filter(Locacao.data_devolucao_real == None).label("total_ativos")
-    ).outerjoin(
-        Locacao, Locacao.cliente_id == Cliente.id
-    ).group_by(
-        Cliente.id
-    ).all()
-
-    clientes_formatados = []
-    for cliente, total_ativos in resultados:
-        cliente.equipamentos_ativos = total_ativos 
-        clientes_formatados.append(cliente)
-
-    return clientes_formatados
+def create_client(db: Session, client: ClienteCreate, user_id):
+    try:
+        client_exist = get_client_by_cnpj(db=db, cnpj = client.cnpj, user_id = user_id)
+        
+        if client_exist:
+            raise HTTPException(status_code=400, detail="CNPJ já cadastrado.")
+        
+        new_client = add_client(db=db, new_client = client, user_id = user_id)
+        return new_client
+    except:
+        raise Exception
+    
