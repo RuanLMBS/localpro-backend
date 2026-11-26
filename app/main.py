@@ -15,9 +15,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-allowed_origins = [
-    "http://localhost:5173"
-]
+allowed_origins = []
 
 if DOMAIN_URL:
     allowed_origins.append(DOMAIN_URL)
@@ -39,4 +37,4 @@ app.include_router(manutencoes.router)
 
 @app.get("/")
 def health_check():
-    return {"mensagem": "No ar!"}
+    return {"mensagem": "On Air"}
